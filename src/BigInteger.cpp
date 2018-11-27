@@ -123,31 +123,41 @@ bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
         LHS = true,
         RHS = false
     };
-    Bigger whichOne = this->value.size() < rhs.value.size() ? Bigger::RHS : Bigger::LHS;
-    size_t i, j;
-    for(i = this->value.size(), j = rhs.value.size(); i>0 && j>0 && i==j; --i, --j) {
-        this->value[i] += rhs.value[j];
-        if(this->value[i] > 9 ) {
-            this->value[i+1] += this->value[i]/10;
-            this->value[i] /= 10;
+    Bigger whichOne = (*this).value.size() < rhs.value.size() ? Bigger::RHS : Bigger::LHS;
+    size_t i=0, j=0;
+    if((*this).sign == '+' && rhs.sign == '+') {
+        for(i = (*this).value.size(), j = rhs.value.size(); i>0 && j>0 && i==j; --i, --j) {
+            this->value[i] += rhs.value[j];
+            if((*this).value[i] > 9 ) {
+                this->value[i+1]++; //= this->value[i+1] + 1;
+                (*this).value[i] %=10;
+            }
+        }
+        if(this->value[i] > 9) {
+            digit_t tmp = this->value[0];
+            this->value.insert(this->value.begin(), tmp/10);
+            *(this->value.begin()+1) = tmp%10;
+        }
+    } else if((*this).sign == '+' && rhs.sign == '-') {
+        for(i = (*this).value.size(), j = rhs.value.size(); i>0 && j>0 && i==j; --i, --j) {
+            (*this).value[i] -= rhs.value[j];
+            if((*this).value[i] < 0 ) {
+                (*this).value[i+1]--;
+                (*this).value[i] = 10 + (*this).value[i]; //positive + negative = subtraction 
+            }
         }
     }
-    if(this->value[i] > 9) {
-        digit_t tmp = this->value[0];
-        this->value.insert(this->value.begin(), tmp/10);
-        *(this->value.begin()+1) = tmp%10;
-    }
-    switch(whichOne) {
+    /*switch(whichOne) {
         case Bigger::LHS : {
             return *this;
         }
         case Bigger::RHS : {
-            for(/*whatever j is*/; j>=0; --j) {
+            for(/*whatever j is; j>=0; --j) {
                 this->value.insert(this->value.begin(), rhs.value[j]);
             }
             return *this;
         }
-    }
+    }*/
 }
 
 bnum::BigInteger& bnum::BigInteger::operator-=(const bnum::BigInteger& rhs)

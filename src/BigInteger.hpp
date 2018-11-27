@@ -41,7 +41,7 @@ namespace bnum
             BigInteger& operator--();
             BigInteger  operator--(int);
 
-            BigInteger  operator -(BigInteger bint);
+            BigInteger  operator -(BigInteger bint); //No need for unary plus tbh
 
             BigInteger& operator+=(const BigInteger& rhs);
             BigInteger& operator-=(const BigInteger& rhs);
@@ -58,7 +58,7 @@ namespace bnum
             friend inline bool operator<(const BigInteger& lhs, const BigInteger& rhs) {
                 if(lhs.sign == '-' && rhs.sign == '+') { return true; }
                 else if(lhs.sign == '+' && rhs.sign == '-') { return false; }
-                else if(lhs.value < rhs.value) { return true; }
+                else if(lhs.value < rhs.value || lhs.value.size() < lhs.value.size() { return true; }
                 else { return false; }
             }
 
