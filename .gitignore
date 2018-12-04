@@ -1,3 +1,6 @@
 *.exe
 .vscode/settings.json
 *.code-workspace
+
+## temp ##
+examples/
