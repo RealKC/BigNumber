@@ -140,7 +140,7 @@ bnum::BigInteger bnum::BigInteger::operator-(BigInteger bint)
 
 bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
 {
-    //TODO: finish
+    //TODO: finish this thing
     enum class Bigger : bool {
         LHS = true,
         RHS = false
