@@ -17,6 +17,7 @@ namespace bnum
             std::vector<digit_t> value;
             void setSign(sign_t sign_);
             BigInteger(sign_t sign_, std::vector<digit_t> value_);
+            void helpMult_(std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller);
         public:
             /*** Constructors & Deconstructor ***/
             BigInteger();

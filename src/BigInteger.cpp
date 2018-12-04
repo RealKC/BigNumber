@@ -50,6 +50,27 @@ bnum::BigInteger::BigInteger(const BigInteger& bint)
     this->value=bint.value;
 }
 
+/*** PRIVATE HELPERS ***/
+
+void bnum::BigInteger::helpMult_(std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller)
+{
+    size_t i, j;
+    for(i = smaller.size()-1; i>=0; --i) {
+        for(j = bigger.size()-1; j>0; --j) {
+            bigger[j] *= smaller[i];
+            if(bigger[j] > 9) {
+                bigger[j+1] += bigger[j] % 10;
+                bigger[j] /= 10;
+            }
+        }
+        if(bigger[0] > 10) {
+            digit_t tmp = bigger[0];
+            bigger[0] %= 10;
+            bigger.insert(bigger.begin(), tmp/10);
+        }
+    }
+}
+
 
 /*** OPERATOR OVERLOADS ***/
 
@@ -146,6 +167,7 @@ bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
                 (*this).value[i] = 10 + (*this).value[i]; //positive + negative = subtraction 
             }
         }
+        
     }
     /*switch(whichOne) {
         case Bigger::LHS : {
@@ -170,6 +192,25 @@ bnum::BigInteger& bnum::BigInteger::operator-=(const bnum::BigInteger& rhs)
         return *this;
     } else {
         if(*this < rhs) { this->sign = (this->sign == '-' && rhs.sign == '-' ? '-' : '+'); } 
+    }
+}
+
+bnum::BigInteger& bnum::BigInteger::operator*=(const bnum::BigInteger& rhs)
+{
+    if((*this).sign == rhs.sign) { (*this).sign = '+'; }
+    else { (*this).sign = '-'; }
+
+    bool rhsMatters = false; 
+    if(rhs.value.size() > (*this).value.size()) { 
+        (*this).value.resize(rhs.value.size());
+        rhsMatters = true;
+    }
+
+    if((*this).value.size() >= rhs.value.size()) { helpMult_((*this).value, rhs.value); }
+    else {
+        std::vector<digit_t> tmp = rhs.value;
+        helpMult_(tmp, (*this).value);
+        (*this).value = tmp;
     }
 }
 /*********NON-MEMBER*******/
