@@ -6,10 +6,11 @@
 
 #include "BigInteger.hpp"
 
-
 /*** CONSTRUCTORS ***/
 
-bnum::BigInteger::BigInteger() {}
+bnum::BigInteger::BigInteger() {
+
+}
 
 bnum::BigInteger::BigInteger(const std::string &bigIntInput)
 {
@@ -37,7 +38,7 @@ bnum::BigInteger::BigInteger(const long long int &bigIntInput)
     }
 
     while(aux!=0) {
-        this->value.push_back(static_cast<digit_t>(aux%10));
+        this->value.push_back(static_cast<BigInteger::digit_t>(aux%10));
         aux/=10;
     }
 
@@ -52,19 +53,19 @@ bnum::BigInteger::BigInteger(const BigInteger& bint)
 
 /*** PRIVATE HELPERS ***/
 
-void bnum::BigInteger::helpMult_(std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller)
+void bnum::BigInteger::helpMult_(std::vector<BigInteger::digit_t> &bigger, const std::vector<BigInteger::digit_t> &smaller)
 {
     size_t i, j;
     for(i = smaller.size()-1; i>=0; --i) {
         for(j = bigger.size()-1; j>0; --j) {
             bigger[j] *= smaller[i];
             if(bigger[j] > 9) {
-                bigger[j+1] += bigger[j] % 10;
+                bigger[j-1] += bigger[j] % 10;
                 bigger[j] /= 10;
             }
         }
         if(bigger[0] > 10) {
-            digit_t tmp = bigger[0];
+            BigInteger::digit_t tmp = bigger[0];
             bigger[0] %= 10;
             bigger.insert(bigger.begin(), tmp/10);
         }
@@ -96,7 +97,7 @@ bnum::BigInteger& bnum::BigInteger::operator++()
     }
     if(*(this->value.begin()) > 9)
     {
-        digit_t tmp=value[0];
+        BigInteger::digit_t tmp=value[0];
         this->value.insert(this->value.begin(), tmp/10);
         *(this->value.begin()+1)=tmp%10;
     }
@@ -138,7 +139,7 @@ bnum::BigInteger bnum::BigInteger::operator-(BigInteger bint)
     return BigInteger((bint.sign == '+' ? '-' : '+'), bint.value);
 }
 
-bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
+/*bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
 {
     //TODO: finish this thing
     enum class Bigger : bool {
@@ -156,7 +157,7 @@ bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
             }
         }
         if(this->value[i] > 9) {
-            digit_t tmp = this->value[0];
+            BigInteger::digit_t tmp = this->value[0];
             this->value.insert(this->value.begin(), tmp/10);
             *(this->value.begin()+1) = tmp%10;
         }
@@ -180,10 +181,10 @@ bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
             }
             return *this;
         }
-    }*/
-}
+    }
+}*/
 
-bnum::BigInteger& bnum::BigInteger::operator-=(const bnum::BigInteger& rhs)
+/*bnum::BigInteger& bnum::BigInteger::operator-=(const bnum::BigInteger& rhs)
 {
     if((*this).isZero())
     {
@@ -209,11 +210,11 @@ bnum::BigInteger& bnum::BigInteger::operator*=(const bnum::BigInteger& rhs)
 
     if((*this).value.size() >= rhs.value.size()) { helpMult_((*this).value, rhs.value); }
     else {
-        std::vector<digit_t> tmp = rhs.value;
+        std::vector<BigInteger::digit_t> tmp = rhs.value;
         helpMult_(tmp, (*this).value);
         (*this).value = tmp;
     }
-}
+}*/
 /*********NON-MEMBER*******/
 
 std::istream& bnum::operator>>(std::istream& is, bnum::BigInteger& bint)
@@ -226,7 +227,8 @@ std::istream& bnum::operator>>(std::istream& is, bnum::BigInteger& bint)
 
 std::ostream& bnum::operator<<(std::ostream& os, bnum::BigInteger& bint)
 {
-    return os << bint.str();
+    os << bint.str();
+    return os;
 }
 
 /*** IMPLEMENTATION OF SOME <cmath> FUNCTIONS***/
@@ -236,6 +238,7 @@ bnum::BigInteger bnum::abs(bnum::BigInteger &bint)
     bnum::BigInteger ret;
     ret.sign = '+';
     ret.value = bint.value;
+    return ret;
 }
 
 /*** CONVERSION ***/    
@@ -244,7 +247,7 @@ std::string bnum::BigInteger::str()
 {
     std::stringstream tmp;
     tmp << this->sign;
-    for(digit_t digit : this->value) {
+    for(BigInteger::digit_t digit : this->value) {
         tmp << digit;
     }
     return tmp.str();
@@ -252,12 +255,12 @@ std::string bnum::BigInteger::str()
 
 /*** UTIL ***/
 
-bnum::digit_t bnum::BigInteger::digitAt(size_t pos, bool signIndexed)
+bnum::BigInteger::digit_t bnum::BigInteger::digitAt(size_t pos, bool signIndexed)
 {
     return (signIndexed ? this->value.at(pos + 1) : this->value.at(pos));
 }
 
-bnum::sign_t bnum::BigInteger::getSign()
+bnum::BigInteger::sign_t bnum::BigInteger::getSign()
 {
     return this->sign;
 }
@@ -273,4 +276,12 @@ bool bnum::BigInteger::isZero()
         if(*it != 0) { return false; }
     }
     return true;
+}
+
+/*** FRIENDS ***/
+
+void bnum::swap(BigInteger& first, BigInteger& second){
+    using std::swap;
+    swap(first.sign, second.sign);
+    swap(first.value, second.value);
 }

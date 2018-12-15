@@ -5,13 +5,12 @@
 #include <vector>
 #include <string>
 
-#include "commons.hpp"
-
 namespace bnum 
 {
-
-    class BigInteger 
-    {
+    class BigInteger {
+        public:
+            using digit_t = short;
+            using sign_t = char;
         private:
             sign_t sign;
             std::vector<digit_t> value;
@@ -19,7 +18,7 @@ namespace bnum
             BigInteger(sign_t sign_, std::vector<digit_t> value_);
             void helpMult_(std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller);
         public:
-            /*** Constructors & Deconstructor ***/
+            /* Constructors & Deconstructor */
             BigInteger();
             BigInteger(const std::string &bigIntInput);
             BigInteger(const long long int &bigIntInput);
@@ -28,11 +27,7 @@ namespace bnum
             ~BigInteger() = default;
 
             /*** Swap ***/
-            friend void swap(BigInteger& first, BigInteger& second) {
-                using std::swap;
-                swap(first.sign, second.sign);
-                swap(first.value, second.value);
-            }
+            friend void swap(BigInteger& first, BigInteger& second);
 
             /*** Member operator overloads ***/
             BigInteger& operator =(BigInteger rhs);
@@ -44,11 +39,11 @@ namespace bnum
 
             BigInteger  operator -(BigInteger bint); //No need for unary plus tbh
 
-            BigInteger& operator+=(const BigInteger& rhs);
-            BigInteger& operator-=(const BigInteger& rhs);
-            BigInteger& operator*=(const BigInteger& rhs);
-            BigInteger& operator/=(const BigInteger& rhs);
-            BigInteger& operator%=(const BigInteger& rhs);
+            //BigInteger& operator+=(const BigInteger& rhs);
+            //BigInteger& operator-=(const BigInteger& rhs);
+            //BigInteger& operator*=(const BigInteger& rhs);
+            //BigInteger& operator/=(const BigInteger& rhs);
+            //BigInteger& operator%=(const BigInteger& rhs);
 
             /*** Friend operator overlods ***/ 
 
@@ -59,7 +54,7 @@ namespace bnum
             friend inline bool operator<(const BigInteger& lhs, const BigInteger& rhs) {
                 if(lhs.sign == '-' && rhs.sign == '+') { return true; }
                 else if(lhs.sign == '+' && rhs.sign == '-') { return false; }
-                else if(lhs.value < rhs.value || lhs.value.size() < lhs.value.size() { return true; }
+                else if(lhs.value < rhs.value || lhs.value.size() < lhs.value.size()) { return true; }
                 else { return false; }
             }
 
@@ -80,6 +75,13 @@ namespace bnum
             friend BigInteger sqrt(BigInteger &bint);
     };
 
+    void swap(BigInteger&, BigInteger&); 
+    BigInteger abs(BigInteger &bint);
+    BigInteger pow(BigInteger &bint);
+    BigInteger sqrt(BigInteger &bint);
+    std::ostream& operator<<(std::ostream&, const BigInteger&);
+    std::istream& operator>>(std::istream&, const BigInteger&);
+
     /*** Literals ***/
     inline BigInteger operator"" _bint(unsigned long long int n) {
         return BigInteger(n);
@@ -92,36 +94,35 @@ namespace bnum
     inline bool operator> (const BigInteger& lhs, const BigInteger& rhs) {
         return operator<(rhs, lhs);   
     }
-    inline bool operator<= (const BigInteger& lhs, const BigInteger& rhs) {
+    inline bool operator<=(const BigInteger& lhs, const BigInteger& rhs) {
         return !operator>(lhs, rhs);
     }
-    inline bool operator>= (const BigInteger& lhs, const BigInteger& rhs) {
+    inline bool operator>=(const BigInteger& lhs, const BigInteger& rhs) {
         return !operator<(lhs, rhs);
     }
 
-    inline BigInteger operator+(BigInteger lhs, BigInteger& rhs) {
-        lhs+=rhs;
-        return lhs;
-    }
-    inline BigInteger operator-(BigInteger lhs, BigInteger& rhs) {
-        lhs-=rhs;
-        return lhs;
-    }
-    inline BigInteger operator*(BigInteger lhs, BigInteger& rhs) {
-        lhs*=rhs;
-        return lhs;
-    }
-    inline BigInteger operator/(BigInteger lhs, BigInteger& rhs) {
-        lhs/=rhs;
-        return lhs;
-    }
-    inline BigInteger operator%(BigInteger lhs, BigInteger& rhs) {
-        lhs%=rhs;
-        return lhs;
-    }
+    //inline BigInteger operator+(BigInteger lhs, BigInteger& rhs) {
+        //lhs+=rhs;
+        //return lhs;
+    //}
+    //inline BigInteger operator-(BigInteger lhs, BigInteger& rhs) {
+        //lhs-=rhs;
+        //return lhs;
+    //}
+    //inline BigInteger operator*(BigInteger lhs, BigInteger& rhs) {
+       // lhs*=rhs;
+        //return lhs;
+    //}
+    //inline BigInteger operator/(BigInteger lhs, BigInteger& rhs) {
+        //lhs/=rhs;
+        //return lhs;
+    //}
+    //inline BigInteger operator%(BigInteger lhs, BigInteger& rhs) {
+        //lhs%=rhs;
+        //return lhs;
+    //}
 
-    std::ostream& operator<<(std::ostream& os, const BigInteger& rhs);
-    std::istream& operator>>(std::istream& is, const BigInteger& rhs);
+    
 }
 
 #endif //BIGINTEGER_HPP
