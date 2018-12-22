@@ -182,8 +182,7 @@ BigInteger& BigInteger::operator++()
             } else { done = true; }
         }
     }
-    if(*(this->value.begin()) > 9)
-    {
+    if(*(this->value.begin()) > 9) {
         BigInteger::digit_t tmp=value[0];
         this->value.insert(this->value.begin(), tmp/10);
         *(this->value.begin()+1)=tmp%10;
@@ -228,71 +227,58 @@ BigInteger BigInteger::operator-(BigInteger bint)
 
 BigInteger& BigInteger::operator+=(const BigInteger& rhs)
 {
-    //TODO: finish this thing
-    enum class Bigger : bool {
-        LHS = true,
-        RHS = false
-    };
-    Bigger whichOne = (*this).value.size() < rhs.value.size() ? Bigger::RHS : Bigger::LHS;
-    size_t i=0, j=0;
-    if((*this).sign == sign_t::plus && rhs.sign == sign_t::plus) {
-        for(i = (*this).value.size(), j = rhs.value.size(); i>0 && j>0 && i==j; --i, --j) {
-            this->value[i] += rhs.value[j];
-            if((*this).value[i] > 9 ) {
-                this->value[i+1]++; //= this->value[i+1] + 1;
-                (*this).value[i] %=10;
-            }
+    if((*this).isZero()) {
+        this->sign = rhs.sign;
+        this->value.resize(rhs.value.size());
+        this->value = rhs.value;
+    } else if(rhs.isZero()) { return *this; } //No reason to do anything in this case
+    else if(this->sign == rhs.sign) {
+        this->value = _helpAdd(this->value, rhs.value);
+    } else { //differing signs, which is when addition is really subtraction
+        if(*this > rhs) {
+            this->value = _helpSub(this->value, rhs.value);
+        } else {
+            this->value = _helpSub(rhs.value, this->value);
         }
-        if(this->value[i] > 9) {
-            BigInteger::digit_t tmp = this->value[0];
-            this->value.insert(this->value.begin(), tmp/10);
-            *(this->value.begin()+1) = tmp%10;
-        }
-    } else if((*this).sign == sign_t::plus && rhs.sign == sign_t::minus) {
-        for(i = (*this).value.size(), j = rhs.value.size(); i>0 && j>0 && i==j; --i, --j) {
-            (*this).value[i] -= rhs.value[j];
-            if((*this).value[i] < 0 ) {
-                (*this).value[i+1]--;
-                (*this).value[i] = 10 + (*this).value[i]; //positive + negative = subtraction 
-            }
-        }
-        
     }
-    /*switch(whichOne) {
-        case Bigger::LHS : {
-            return *this;
-        }
-        case Bigger::RHS : {
-            for(/*whatever j is; j>=0; --j) {
-                this->value.insert(this->value.begin(), rhs.value[j]);
-            }
-            return *this;
-        }
-    }*/
+
+    return *this;
 }
 
 BigInteger& BigInteger::operator-=(const BigInteger& rhs)
 {
-    if((*this).isZero())
-    {
-        if(rhs.sign == sign_t::minus){ this->sign = sign_t::plus; }
-        else { this->sign = sign_t::minus; }
+    if(rhs.isZero()) { return *this; } //Why do anything in this case anyway?
+    else if((*this).isZero()) {
+        this->sign = (rhs.sign == sign_t::plus) ? sign_t::minus : sign_t::plus;
+        this->value.resize(rhs.value.size());
         this->value = rhs.value;
         return *this;
+    } else if(this->sign == sign_t::minus && rhs.sign == sign_t::plus) {
+        //Subtracting a positive from a negative makes addition
+        //Example: (-5)-(3) = -8
+        this->value = _helpAdd(this->value, rhs.value);
     } else {
-        if(*this < rhs) { 
-            this->sign = (this->sign == sign_t::minus && rhs.sign == sign_t::minus 
-                ? sign_t::minus 
-                : sign_t::plus); 
-        } 
+        if(rhs > *this) {
+            this->value = _helpSub(rhs.value, this->value);
+        } else {
+            this->value = _helpSub(this->value, rhs.value);
+        }
     }
+    
+    return *this;
 }
 
 BigInteger& BigInteger::operator*=(const BigInteger& rhs)
 {
+    if((*this).isZero() || rhs.isZero() ) {
+        this->sign = sign_t::plus;
+        this->value = { 0 };
+        return *this;
+    }
+    
     if((*this).sign == rhs.sign) { (*this).sign = sign_t::plus; }
     else { (*this).sign = sign_t::minus; }
-
+/*
     bool rhsMatters = false; 
     if(rhs.value.size() > (*this).value.size()) { 
         (*this).value.resize(rhs.value.size());
@@ -304,7 +290,7 @@ BigInteger& BigInteger::operator*=(const BigInteger& rhs)
         std::vector<BigInteger::digit_t> tmp = rhs.value;
         _helpMult(tmp, (*this).value);
         (*this).value = tmp;
-    }
+    }*/
 }
 /*********NON-MEMBER*******/
 
@@ -361,7 +347,7 @@ size_t BigInteger::getLength()
     return this->value.size();
 }
 
-bool BigInteger::isZero()
+bool BigInteger::isZero() const
 {
     for(auto it = this->value.begin(); it != this->value.end(); ++it) {
         if(*it != 0) { return false; }

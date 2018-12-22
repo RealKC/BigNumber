@@ -17,11 +17,7 @@ namespace bnum
         private:
             sign_t sign;
             std::vector<digit_t> value;
-            void setSign(sign_t sign_);
-            BigInteger(sign_t sign_, std::vector<digit_t> value_);
-            void _helpMult(std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller);
-            std::vector<digit_t>& _helpAdd(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
-            std::vector<digit_t>& _helpSub(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
+            
         public:
             /* Constructors & Deconstructor */
             BigInteger();
@@ -72,12 +68,18 @@ namespace bnum
             digit_t digitAt(size_t pos, bool signedIndexed = true);
             sign_t getSign();
             size_t getLength();
-            bool isZero();
+            bool isZero() const;
 
             /*** Friend functions for different stuff ***/
             friend BigInteger abs(BigInteger &bint);
             friend BigInteger pow(BigInteger &bint);
             friend BigInteger sqrt(BigInteger &bint);
+
+        private:
+            BigInteger(sign_t sign_, std::vector<digit_t> value_);
+            void _helpMult(std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller);
+            std::vector<digit_t>& _helpAdd(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
+            std::vector<digit_t>& _helpSub(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
     };
 
     void swap(BigInteger&, BigInteger&); 
