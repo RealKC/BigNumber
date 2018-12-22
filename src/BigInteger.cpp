@@ -6,18 +6,21 @@
 
 #include "BigInteger.hpp"
 
+namespace bnum
+{
+
 /*** CONSTRUCTORS ***/
 
-bnum::BigInteger::BigInteger() {}
+BigInteger::BigInteger() {}
 
-bnum::BigInteger::BigInteger(const std::string bigIntInput)
+BigInteger::BigInteger(const std::string bigIntInput)
 {
     bool startFromOne;
     if(!isalpha(bigIntInput[0]) && (bigIntInput[0]=='+' || bigIntInput[0]=='-')) {
         this->sign=static_cast<sign_t>(bigIntInput[0]);
         startFromOne=true;
     } else { 
-        this->sign=sign_t::PLUS;
+        this->sign=sign_t::plus;
         startFromOne=false;
     }
 
@@ -26,12 +29,12 @@ bnum::BigInteger::BigInteger(const std::string bigIntInput)
     }
 }
 
-bnum::BigInteger::BigInteger(const long long int bigIntInput)
+BigInteger::BigInteger(const long long int bigIntInput)
 {
     long long int aux = bigIntInput;
-    if(bigIntInput >= 0) { this->sign=sign_t::PLUS; }
+    if(bigIntInput >= 0) { this->sign=sign_t::plus; }
     else { 
-        this->sign=sign_t::MINUS;
+        this->sign=sign_t::minus;
         aux = -aux;
     }
 
@@ -43,14 +46,14 @@ bnum::BigInteger::BigInteger(const long long int bigIntInput)
     std::reverse(this->value.begin(), this->value.end());
 }
 
-bnum::BigInteger::BigInteger(sign_t sign_, std::vector<digit_t> value_) 
+BigInteger::BigInteger(sign_t sign_, std::vector<digit_t> value_) 
 {
     sign = sign_;
     this->value.resize(value_.size());
     value = value_;   
 }
 
-bnum::BigInteger::BigInteger(const BigInteger& bint)
+BigInteger::BigInteger(const BigInteger& bint)
 {
     this->sign=bint.sign;
     this->value=bint.value;
@@ -58,7 +61,7 @@ bnum::BigInteger::BigInteger(const BigInteger& bint)
 
 /*** PRIVATE HELPERS ***/
 
-void bnum::BigInteger::helpMult_(std::vector<BigInteger::digit_t> &bigger, const std::vector<BigInteger::digit_t> &smaller)
+void BigInteger::_helpMult(std::vector<BigInteger::digit_t> &bigger, const std::vector<BigInteger::digit_t> &smaller)
 {
     size_t i, j;
     for(i = smaller.size()-1; i>=0; --i) {
@@ -77,17 +80,96 @@ void bnum::BigInteger::helpMult_(std::vector<BigInteger::digit_t> &bigger, const
     }
 }
 
+std::vector<BigInteger::digit_t>& BigInteger::_helpAdd(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs)
+{
+    digit_t carry = 0;
+    std::vector<digit_t> sum;
+    sum.reserve(lhs.size() > rhs.size() ? lhs.size() : rhs.size());
+    auto it_sum_digit = sum.rbegin();
+    auto i = lhs.rbegin(), j = rhs.rbegin();
 
+    for(; i != lhs.rend() && j != rhs.rend(); ++i, ++j) {
+        (*it_sum_digit) = carry + (*i) + (*j);
+        if((*it_sum_digit) > 9) {
+            carry = 1;
+            (*it_sum_digit) %= 10;
+        } else { carry = 0; }
+        ++it_sum_digit;
+    }
+
+    if(i != lhs.rend()) {
+        //lhs and sum should have the same size if we get in this if
+        if(carry) {
+            (*it_sum_digit) = (*i) + carry;
+            ++i; ++it_sum_digit;
+        }
+        for(; i != lhs.rend() && it_sum_digit != sum.rend(); ++i, ++it_sum_digit) {
+            (*it_sum_digit) = (*i);
+        }
+    }
+    if(j != rhs.rend()) {
+        //lhs and sum should have the same size if we get in this if
+        if(carry) {
+            (*it_sum_digit) = (*j) + carry;
+            ++j; ++it_sum_digit;
+        }
+        for(;j != rhs.rend() && it_sum_digit != sum.rend(); ++j, ++it_sum_digit) {
+            (*it_sum_digit) = (*j);
+        }
+    }
+
+    return sum;
+}
+
+std::vector<BigInteger::digit_t>& BigInteger::_helpSub(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs) {
+    std::vector<digit_t> difference(lhs.size() > rhs.size() ? lhs.size() : rhs.size(), 0);
+    digit_t carry = 0;
+    auto it_diff_digit = difference.rbegin();
+    auto i = lhs.rbegin(), j = rhs.rbegin();
+
+    for(; i != lhs.rend() && j != rhs.rend(); ++i, ++j, ++it_diff_digit) {
+        (*it_diff_digit) = (*i) - (*j) + carry;
+        if((*it_diff_digit) < 0) {
+            carry = -1;
+        } else { carry = 0; }
+    }
+
+    if(i != lhs.rend()) {
+        if(carry == -1) {
+            *it_diff_digit = *i + carry;
+            ++i; ++it_diff_digit;
+        }
+        for(; i != lhs.rend(), it_diff_digit != difference.rend(); ++i, ++it_diff_digit) {
+            *it_diff_digit = *i;
+        }
+    }
+    if(j != rhs.rend()) {
+        if(carry == -1) {
+            *it_diff_digit = *j + carry;
+            ++j; ++it_diff_digit;
+        }
+        for(; j != rhs.rend(), it_diff_digit != difference.rend(); ++j, ++it_diff_digit) {
+            *it_diff_digit = *j;
+        }
+    }
+
+    if(difference[0] == 0){
+       difference.erase(difference.begin(),
+                        std::find(difference.begin(), difference.end(),
+                                [](auto elem){ return elem != 0; }));
+    }
+    return difference;
+}
 /*** OPERATOR OVERLOADS ***/
 
 /***********MEMBER*********/
-bnum::BigInteger& bnum::BigInteger::operator=(bnum::BigInteger rhs)
+BigInteger& BigInteger::operator=(BigInteger rhs)
 {
     swap(*this, rhs);
     return *this;
 }
 
-bnum::BigInteger& bnum::BigInteger::operator++()
+BigInteger& BigInteger::operator++()
 {
     this->value[this->value.back()]++;
     if(this->value[this->value.back()] < 10) { return *this; }
@@ -109,14 +191,14 @@ bnum::BigInteger& bnum::BigInteger::operator++()
     return *this;
 }
 
-bnum::BigInteger bnum::BigInteger::operator++(int)
+BigInteger BigInteger::operator++(int)
 {
     BigInteger tmp(*this);
     operator++();
     return tmp;
 }
 
-bnum::BigInteger& bnum::BigInteger::operator--()
+BigInteger& BigInteger::operator--()
 {
     this->value[this->value.back()]--;
     if(this->value[this->value.back()] >= 0 ) { return *this; }
@@ -132,19 +214,19 @@ bnum::BigInteger& bnum::BigInteger::operator--()
     return *this;
 }
 
-bnum::BigInteger bnum::BigInteger::operator--(int)
+BigInteger BigInteger::operator--(int)
 {
     BigInteger tmp(*this);
     operator--();
     return tmp;
 }
 
-bnum::BigInteger bnum::BigInteger::operator-(BigInteger bint)
+BigInteger BigInteger::operator-(BigInteger bint)
 {
-    return BigInteger(bint.sign == sign_t::PLUS ? sign_t::MINUS : sign_t::PLUS, bint.value);
+    return BigInteger(bint.sign == sign_t::plus ? sign_t::minus : sign_t::plus, bint.value);
 }
 
-bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
+BigInteger& BigInteger::operator+=(const BigInteger& rhs)
 {
     //TODO: finish this thing
     enum class Bigger : bool {
@@ -153,7 +235,7 @@ bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
     };
     Bigger whichOne = (*this).value.size() < rhs.value.size() ? Bigger::RHS : Bigger::LHS;
     size_t i=0, j=0;
-    if((*this).sign == '+' && rhs.sign == '+') {
+    if((*this).sign == sign_t::plus && rhs.sign == sign_t::plus) {
         for(i = (*this).value.size(), j = rhs.value.size(); i>0 && j>0 && i==j; --i, --j) {
             this->value[i] += rhs.value[j];
             if((*this).value[i] > 9 ) {
@@ -166,7 +248,7 @@ bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
             this->value.insert(this->value.begin(), tmp/10);
             *(this->value.begin()+1) = tmp%10;
         }
-    } else if((*this).sign == '+' && rhs.sign == '-') {
+    } else if((*this).sign == sign_t::plus && rhs.sign == sign_t::minus) {
         for(i = (*this).value.size(), j = rhs.value.size(); i>0 && j>0 && i==j; --i, --j) {
             (*this).value[i] -= rhs.value[j];
             if((*this).value[i] < 0 ) {
@@ -189,23 +271,27 @@ bnum::BigInteger& bnum::BigInteger::operator+=(const bnum::BigInteger& rhs)
     }*/
 }
 
-bnum::BigInteger& bnum::BigInteger::operator-=(const bnum::BigInteger& rhs)
+BigInteger& BigInteger::operator-=(const BigInteger& rhs)
 {
     if((*this).isZero())
     {
-        if(rhs.sign == '-'){ this->sign = '+'; }
-        else { this->sign = '-'; }
+        if(rhs.sign == sign_t::minus){ this->sign = sign_t::plus; }
+        else { this->sign = sign_t::minus; }
         this->value = rhs.value;
         return *this;
     } else {
-        if(*this < rhs) { this->sign = (this->sign == '-' && rhs.sign == '-' ? '-' : '+'); } 
+        if(*this < rhs) { 
+            this->sign = (this->sign == sign_t::minus && rhs.sign == sign_t::minus 
+                ? sign_t::minus 
+                : sign_t::plus); 
+        } 
     }
 }
 
-bnum::BigInteger& bnum::BigInteger::operator*=(const bnum::BigInteger& rhs)
+BigInteger& BigInteger::operator*=(const BigInteger& rhs)
 {
-    if((*this).sign == rhs.sign) { (*this).sign = '+'; }
-    else { (*this).sign = '-'; }
+    if((*this).sign == rhs.sign) { (*this).sign = sign_t::plus; }
+    else { (*this).sign = sign_t::minus; }
 
     bool rhsMatters = false; 
     if(rhs.value.size() > (*this).value.size()) { 
@@ -213,16 +299,16 @@ bnum::BigInteger& bnum::BigInteger::operator*=(const bnum::BigInteger& rhs)
         rhsMatters = true;
     }
 
-    if((*this).value.size() >= rhs.value.size()) { helpMult_((*this).value, rhs.value); }
+    if((*this).value.size() >= rhs.value.size()) { _helpMult((*this).value, rhs.value); }
     else {
         std::vector<BigInteger::digit_t> tmp = rhs.value;
-        helpMult_(tmp, (*this).value);
+        _helpMult(tmp, (*this).value);
         (*this).value = tmp;
     }
 }
 /*********NON-MEMBER*******/
 
-std::istream& bnum::operator>>(std::istream& is, bnum::BigInteger& bint)
+std::istream& operator>>(std::istream& is, BigInteger& bint)
 {
     std::string tmp;
     is >> tmp;
@@ -230,7 +316,7 @@ std::istream& bnum::operator>>(std::istream& is, bnum::BigInteger& bint)
     return is;
 }
 
-std::ostream& bnum::operator<<(std::ostream& os, bnum::BigInteger& bint)
+std::ostream& operator<<(std::ostream& os, BigInteger& bint)
 {
     os << bint.str();
     return os;
@@ -238,17 +324,17 @@ std::ostream& bnum::operator<<(std::ostream& os, bnum::BigInteger& bint)
 
 /*** IMPLEMENTATION OF SOME <cmath> FUNCTIONS***/
 
-bnum::BigInteger bnum::abs(bnum::BigInteger &bint)
+BigInteger abs(BigInteger &bint)
 {
-    bnum::BigInteger ret;
-    ret.sign = BigInteger::sign_t::PLUS;
+    BigInteger ret;
+    ret.sign = BigInteger::sign_t::plus;
     ret.value = bint.value;
     return ret;
 }
 
 /*** CONVERSION ***/    
 
-std::string bnum::BigInteger::str()
+std::string BigInteger::str()
 {
     std::stringstream tmp;
     tmp << static_cast<char>(this->sign);
@@ -260,22 +346,22 @@ std::string bnum::BigInteger::str()
 
 /*** UTIL ***/
 
-bnum::BigInteger::digit_t bnum::BigInteger::digitAt(size_t pos, bool signIndexed)
+BigInteger::digit_t BigInteger::digitAt(size_t pos, bool signIndexed)
 {
     return (signIndexed ? this->value.at(pos + 1) : this->value.at(pos));
 }
 
-bnum::BigInteger::sign_t bnum::BigInteger::getSign()
+BigInteger::sign_t BigInteger::getSign()
 {
     return this->sign;
 }
 
-size_t bnum::BigInteger::getLength()
+size_t BigInteger::getLength()
 {
     return this->value.size();
 }
 
-bool bnum::BigInteger::isZero()
+bool BigInteger::isZero()
 {
     for(auto it = this->value.begin(); it != this->value.end(); ++it) {
         if(*it != 0) { return false; }
@@ -285,8 +371,10 @@ bool bnum::BigInteger::isZero()
 
 /*** FRIENDS ***/
 
-void bnum::swap(BigInteger& first, BigInteger& second){
+void swap(BigInteger& first, BigInteger& second){
     using std::swap;
     swap(first.sign, second.sign);
     swap(first.value, second.value);
+}
+
 }

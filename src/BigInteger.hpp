@@ -11,15 +11,17 @@ namespace bnum
         public:
             using digit_t = short;
             enum class sign_t : char {
-                PLUS = '+',
-                MINUS = '-'
+                plus = '+',
+                minus = '-'
             };
         private:
             sign_t sign;
             std::vector<digit_t> value;
             void setSign(sign_t sign_);
             BigInteger(sign_t sign_, std::vector<digit_t> value_);
-            void helpMult_(std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller);
+            void _helpMult(std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller);
+            std::vector<digit_t>& _helpAdd(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
+            std::vector<digit_t>& _helpSub(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
         public:
             /* Constructors & Deconstructor */
             BigInteger();
@@ -92,7 +94,7 @@ namespace bnum
 
     std::ostream& operator<<(std::ostream& os, BigInteger& bint);
     std::istream& operator>>(std::istream& is, BigInteger& bint);
-    
+
     inline bool operator!=(const BigInteger& lhs, const BigInteger& rhs) {
         return !operator==(lhs, rhs);
     }
