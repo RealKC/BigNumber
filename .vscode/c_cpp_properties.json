@@ -2,6 +2,8 @@
     "configurations": [
         {
             "name": "Win32",
+            "compilerPath": "C:/MinGW/bin/g++.exe",
+            "intelliSenseMode": "clang-x64",
             "includePath": [
                 "${workspaceFolder}/**"
             ],
@@ -10,11 +12,9 @@
                 "UNICODE",
                 "_UNICODE"
             ],
-            "compilerPath": "C:/MinGW/bin/g++.exe",
             "windowsSdkVersion": "8.1",
             "cStandard": "c11",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64"
+            "cppStandard": "c++17"
         }
     ],
     "version": 4
