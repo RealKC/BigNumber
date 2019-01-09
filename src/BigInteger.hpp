@@ -18,15 +18,15 @@ namespace BigNumbers
         };
 
         /* Constructors & Deconstructor */
-        BigInteger() noexcept;
-        BigInteger(const std::string bigIntInput) noexcept;
-        BigInteger(const unsigned long long bigIntInput) noexcept;
-        BigInteger(const long long int bigIntInput) noexcept;
-        BigInteger(const BigInteger &bigIntInput) noexcept;
-        BigInteger(BigInteger &&bigIntInput) noexcept;
+        BigInteger();
+        BigInteger(const std::string bigIntInput);
+        BigInteger(const unsigned long long bigIntInput);
+        BigInteger(const long long int bigIntInput);
+        BigInteger(const BigInteger &bigIntInput);
+        BigInteger(BigInteger &&bigIntInput);
 
-        BigInteger& operator=(BigInteger &rhs) noexcept;
-        BigInteger& operator=(BigInteger &&rhs) noexcept;
+        BigInteger& operator=(BigInteger &rhs);
+        BigInteger& operator=(BigInteger &&rhs);
 
         ~BigInteger() = default;
 
