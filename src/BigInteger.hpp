@@ -5,81 +5,86 @@
 #include <vector>
 #include <string>
 
-namespace bnum 
+#include "exceptions.hpp"
+
+namespace BigNumbers 
 {
     class BigInteger {
-        public:
-            using digit_t = short;
-            enum class sign_t : char {
-                plus = '+',
-                minus = '-'
-            };
-        private:
-            sign_t sign;
-            std::vector<digit_t> value;
+    public:
+        using digit_t = short;
+        enum class sign_t : char {
+            plus = '+',
+            minus = '-'
+        };
+
+        /* Constructors & Deconstructor */
+        BigInteger() noexcept;
+        BigInteger(const std::string bigIntInput) noexcept;
+        BigInteger(const unsigned long long bigIntInput) noexcept;
+        BigInteger(const long long int bigIntInput) noexcept;
+        BigInteger(const BigInteger &bigIntInput) noexcept;
+        BigInteger(BigInteger &&bigIntInput) noexcept;
+
+        BigInteger& operator=(BigInteger &rhs) noexcept;
+        BigInteger& operator=(BigInteger &&rhs) noexcept;
+
+        ~BigInteger() = default;
+
+        /*** Swap ***/
+        friend void swap(BigInteger& first, BigInteger& second);
+
+        /*** Member operator overloads ***/
             
-        public:
-            /* Constructors & Deconstructor */
-            BigInteger();
-            BigInteger(const std::string bigIntInput);
-            BigInteger(const long long int bigIntInput);
-            BigInteger(const BigInteger &bigint);
+        BigInteger& operator++();
+        BigInteger  operator++(int);
+        BigInteger& operator--();
+        BigInteger  operator--(int);
 
-            ~BigInteger() = default;
+        BigInteger  operator -(BigInteger bint); //No need for unary plus tbh
 
-            /*** Swap ***/
-            friend void swap(BigInteger& first, BigInteger& second);
+        BigInteger& operator+=(const BigInteger& rhs);
+        BigInteger& operator-=(const BigInteger& rhs);
+        BigInteger& operator*=(const BigInteger& rhs);
+        BigInteger& operator/=(const BigInteger& rhs);
+        BigInteger& operator%=(const BigInteger& rhs);
 
-            /*** Member operator overloads ***/
-            BigInteger& operator =(BigInteger rhs);
-            
-            BigInteger& operator++();
-            BigInteger  operator++(int);
-            BigInteger& operator--();
-            BigInteger  operator--(int);
+        /*** Friend operator overlods ***/ 
 
-            BigInteger  operator -(BigInteger bint); //No need for unary plus tbh
+        friend inline bool operator==(const BigInteger& lhs, const BigInteger& rhs) {
+            return (lhs.sign == rhs.sign && lhs.value == rhs.value);
+        }
 
-            BigInteger& operator+=(const BigInteger& rhs);
-            BigInteger& operator-=(const BigInteger& rhs);
-            BigInteger& operator*=(const BigInteger& rhs);
-            BigInteger& operator/=(const BigInteger& rhs);
-            BigInteger& operator%=(const BigInteger& rhs);
+        friend inline bool operator<(const BigInteger& lhs, const BigInteger& rhs) {
+            if(lhs.sign == sign_t::MINUS && rhs.sign == sign_t::PLUS) { return true; }
+            else if(lhs.sign == sign_t::PLUS && rhs.sign == sign_t::MINUS) { return false; }
+            else if(lhs.value < rhs.value || lhs.value.size() < lhs.value.size()) { return true; }
+            else { return false; }
+        }
 
-            /*** Friend operator overlods ***/ 
+        /*** Nice conversion functions ***/
+        std::string str();
+        long long int toLlInt();
+        unsigned long long int toUllInt();
 
-            friend inline bool operator==(const BigInteger& lhs, const BigInteger& rhs) {
-                return (lhs.sign == rhs.sign && lhs.value == rhs.value);
-            }
+        /*** Util functions ***/
+        digit_t digitAt(size_t pos);
+        sign_t getSign();
+        size_t getLength(); //TODO: 
+        bool isZero() const;
 
-            friend inline bool operator<(const BigInteger& lhs, const BigInteger& rhs) {
-                if(lhs.sign == sign_t::MINUS && rhs.sign == sign_t::PLUS) { return true; }
-                else if(lhs.sign == sign_t::PLUS && rhs.sign == sign_t::MINUS) { return false; }
-                else if(lhs.value < rhs.value || lhs.value.size() < lhs.value.size()) { return true; }
-                else { return false; }
-            }
+        /*** Friend functions for different stuff ***/
+        friend BigInteger abs(BigInteger &bint);
+        friend BigInteger pow(BigInteger &bint);
+        friend BigInteger sqrt(BigInteger &bint);
+        friend void swap(BigInteger&, BigInteger&);
 
-            /*** Nice conversion functions ***/
-            std::string str();
-            long long int toLlInt();
-            unsigned long long int toUllInt();
-
-            /*** Util functions ***/
-            digit_t digitAt(size_t pos, bool signedIndexed = true);
-            sign_t getSign();
-            size_t getLength();
-            bool isZero() const;
-
-            /*** Friend functions for different stuff ***/
-            friend BigInteger abs(BigInteger &bint);
-            friend BigInteger pow(BigInteger &bint);
-            friend BigInteger sqrt(BigInteger &bint);
-
-        private:
-            BigInteger(sign_t sign_, std::vector<digit_t> value_);
-            void _helpMult(std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller);
-            std::vector<digit_t>& _helpAdd(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
-            std::vector<digit_t>& _helpSub(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
+    private:
+        sign_t sign;
+        std::vector<digit_t> value;
+        BigInteger(sign_t sign_, std::vector<digit_t> value_);
+        std::vector<digit_t>& _helpMult(const std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller);
+        std::vector<digit_t>& _helpAdd(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
+        std::vector<digit_t>& _helpSub(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
     };
 
     void swap(BigInteger&, BigInteger&); 
