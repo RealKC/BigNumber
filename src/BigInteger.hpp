@@ -20,9 +20,18 @@ namespace BigNumbers
 
         /* Constructors & Deconstructor */
         BigInteger();
+
         BigInteger(const std::string bigIntInput);
-        BigInteger(const unsigned long long bigIntInput);
-        BigInteger(const long long int bigIntInput);
+
+        BigInteger(const unsigned long long int bigIntInput);
+        BigInteger(const unsigned long int      bigIntInput);
+        BigInteger(const unsigned int           bigIntInput);
+        BigInteger(const unsigned short         bigIntInput);
+        BigInteger(const long long int          bigIntInput);
+        BigInteger(const long int               bigIntInput);
+        BigInteger(const int                    bigIntInput);
+        BigInteger(const short                  bigIntInput);
+
         BigInteger(const BigInteger &bigIntInput);
         BigInteger(BigInteger &&bigIntInput);
 
@@ -74,9 +83,9 @@ namespace BigNumbers
         bool isZero() const;
 
         /*** Friend functions for different stuff ***/
-        friend BigInteger abs(BigInteger &bint);
-        friend BigInteger pow(BigInteger &bint);
-        friend BigInteger sqrt(BigInteger &bint);
+        friend BigInteger abs(const BigInteger &bint);
+        friend BigInteger pow(const BigInteger &base, const BigInteger& exponent);
+        friend BigInteger sqrt(const BigInteger &bint);
         friend void swap(BigInteger&, BigInteger&);
 
     private:
@@ -90,11 +99,12 @@ namespace BigNumbers
     };
 
     void swap(BigInteger&, BigInteger&); 
-    BigInteger pow(BigInteger &bint);
-    BigInteger sqrt(BigInteger &bint);
+    BigInteger abs(const BigInteger &bint);
+    BigInteger pow(const BigInteger &base, const BigInteger& exponent);
+    BigInteger sqrt(const BigInteger &bint);
 
     /*** Literals ***/
-    inline BigInteger operator"" _bint(unsigned long long int n) {
+    inline BigInteger operator"" _BigInt(unsigned long long int n) {
         return BigInteger(n);
     }
 
@@ -116,23 +126,23 @@ namespace BigNumbers
         return !operator<(lhs, rhs);
     }
 
-    inline BigInteger operator+(BigInteger lhs, BigInteger& rhs) {
+    inline BigInteger operator+(BigInteger lhs, const BigInteger& rhs) {
         lhs+=rhs;
         return lhs;
     }
-    inline BigInteger operator-(BigInteger lhs, BigInteger& rhs) {
+    inline BigInteger operator-(BigInteger lhs, const BigInteger& rhs) {
         lhs-=rhs;
         return lhs;
     }
-    inline BigInteger operator*(BigInteger lhs, BigInteger& rhs) {
+    inline BigInteger operator*(BigInteger lhs, const BigInteger& rhs) {
        lhs*=rhs;
        return lhs;
     }
-    inline BigInteger operator/(BigInteger lhs, BigInteger& rhs) {
+    inline BigInteger operator/(BigInteger lhs, const BigInteger& rhs) {
         lhs/=rhs;
         return lhs;
     }
-    inline BigInteger operator%(BigInteger lhs, BigInteger& rhs) {
+    inline BigInteger operator%(BigInteger lhs, const BigInteger& rhs) {
         lhs%=rhs;
         return lhs;
     }

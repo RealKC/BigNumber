@@ -32,7 +32,78 @@ BigInteger::BigInteger(const std::string bigIntInput)
     }
 }
 
+BigInteger::BigInteger(const unsigned long long int bigIntInput)
+{
+    unsigned long long int aux = bigIntInput;
+    this->sign=sign_t::plus;
+
+    while(aux!=0) {
+        this->value.push_back(static_cast<BigInteger::digit_t>(aux%10));
+        aux/=10;
+    }
+}
+BigInteger::BigInteger(const unsigned long int bigIntInput)
+{
+    unsigned long int aux = bigIntInput;
+    this->sign=sign_t::plus;
+
+    while(aux!=0) {
+        this->value.push_back(static_cast<BigInteger::digit_t>(aux%10));
+        aux/=10;
+    }
+}
+BigInteger::BigInteger(const unsigned int bigIntInput)
+{
+    unsigned int aux = bigIntInput;
+    this->sign=sign_t::plus;
+
+    while(aux!=0) {
+        this->value.push_back(static_cast<BigInteger::digit_t>(aux%10));
+        aux/=10;
+    }
+}
+BigInteger::BigInteger(const unsigned short bigIntInput)
+{
+    unsigned short aux = bigIntInput;
+    this->sign=sign_t::plus;
+
+    while(aux!=0) {
+        this->value.push_back(static_cast<BigInteger::digit_t>(aux%10));
+        aux/=10;
+    }
+}
+
 BigInteger::BigInteger(const long long int bigIntInput)
+{
+    long long int aux = bigIntInput;
+    if(bigIntInput >= 0) { this->sign=sign_t::plus; }
+    else { 
+        this->sign=sign_t::minus;
+        aux = -aux;
+    }
+
+    while(aux!=0) {
+        this->value.push_back(static_cast<BigInteger::digit_t>(aux%10));
+        aux/=10;
+    }
+}
+
+BigInteger::BigInteger(const long int bigIntInput)
+{
+    long long int aux = bigIntInput;
+    if(bigIntInput >= 0) { this->sign=sign_t::plus; }
+    else { 
+        this->sign=sign_t::minus;
+        aux = -aux;
+    }
+
+    while(aux!=0) {
+        this->value.push_back(static_cast<BigInteger::digit_t>(aux%10));
+        aux/=10;
+    }
+}
+
+BigInteger::BigInteger(const int bigIntInput)
 {
     long long int aux = bigIntInput;
     if(bigIntInput >= 0) { this->sign=sign_t::plus; }
@@ -359,14 +430,51 @@ std::ostream& operator<<(std::ostream& os, BigInteger& bint)
     return os;
 }
 
-/*** IMPLEMENTATION OF SOME <cmath> FUNCTIONS***/
+/*** IMPLEMENTATION OF SOME MATHEMATICAL FUNCTIONS***/
 
-BigInteger abs(BigInteger &bint)
+BigInteger abs(const BigInteger &bint)
 {
     BigInteger ret;
     ret.sign = BigInteger::sign_t::plus;
     ret.value = bint.value;
     return ret;
+}
+
+BigInteger pow(BigInteger &base, BigInteger& exponent) 
+{
+    if(base.isZero()) {
+        return 0_BigInt;
+    }
+    BigInteger result = 1;
+    for(BigInteger i = 0; i < exponent; ++i) {
+        result *= base;
+    }
+
+    return result;
+}
+
+BigInteger sqrt(BigInteger& bint)
+{
+    if(bint < 0) {
+        throw Exceptions::NegativeArgument("square root of a negative does not exist");
+    }
+
+    //Wrote using this Wikipedia page https://en.wikipedia.org/wiki/Integer_square_root#Using_only_integer_division
+    // and this SO post https://stackoverflow.com/questions/21657491/an-efficient-algorithm-to-calculate-the-integer-square-root-isqrt-of-arbitrari
+    // despite it being tagged for erlang, it contained a C/C++ answer
+    if(bint.isZero()) {
+        return 0_BigInt;
+    }
+
+    BigInteger xk = bint, xk1 = 0;
+    do {
+        xk1 = (xk + bint / xk) / 2_BigInt;
+        if(xk1 >= xk) {
+            return xk;
+        } else {
+            xk = xk1;
+        }
+    } while(true);
 }
 
 /*** CONVERSION ***/    
@@ -412,10 +520,10 @@ bool BigInteger::isZero() const
 
 /*** FRIENDS ***/
 
-void swap(BigInteger& first, BigInteger& second){
+void swap(BigInteger& first, BigInteger& second)
+{
     using std::swap;
     swap(first.sign, second.sign);
     swap(first.value, second.value);
 }
-
 }
