@@ -2,8 +2,9 @@
 #define BIGINTEGER_HPP
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
+#include <utility>
 
 #include "exceptions.hpp"
 
@@ -69,7 +70,7 @@ namespace BigNumbers
         /*** Util functions ***/
         digit_t digitAt(size_t pos);
         sign_t getSign();
-        size_t getLength(); //TODO: 
+        size_t getNumberOfDigits(); //TODO: 
         bool isZero() const;
 
         /*** Friend functions for different stuff ***/
@@ -82,13 +83,13 @@ namespace BigNumbers
         sign_t sign;
         std::vector<digit_t> value;
         BigInteger(sign_t sign_, std::vector<digit_t> value_);
-        std::vector<digit_t>& _helpMult(const std::vector<digit_t> &bigger, const std::vector<digit_t> &smaller);
-        std::vector<digit_t>& _helpAdd(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
-        std::vector<digit_t>& _helpSub(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
+        std::pair<BigInteger,BigInteger>& _helpDiv (BigInteger &lhs, const BigInteger &rhs);
+        std::vector<digit_t>& _helpMult(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
+        std::vector<digit_t>& _helpAdd (const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
+        std::vector<digit_t>& _helpSub (const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs);
     };
 
     void swap(BigInteger&, BigInteger&); 
-    BigInteger abs(BigInteger &bint);
     BigInteger pow(BigInteger &bint);
     BigInteger sqrt(BigInteger &bint);
 

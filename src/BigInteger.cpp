@@ -73,23 +73,44 @@ std::vector<BigInteger::digit_t>& BigInteger::_helpMult(const std::vector<BigInt
     std::vector<digit_t> product;
     product.resize(lhs.size() + rhs.size());
 
-    for(auto i = lhs.size() - 1; i >= 0; --i) {
-        auto it_prod_digit = product.size() - 1;
-        carry = 0;
-        for(auto j = rhs.size() - 1; j >= 0; --j, --it_prod_digit) {
-            product[i+j] += carry + lhs[i] * rhs[j];
-            carry = product[i+j] / 10;
-            product[i+j] %= 10;
+    for(size_t i = 0; i < lhs.size(); i++) {
+        for(size_t j = 0; j < rhs.size(); j++) {
+            product[i+j] += lhs[i] * rhs[i];
         }
-        product[i];
     }
+
+    for(size_t i = 0; i <= product.size(); i++) {
+        if(product[i] > 9) {
+            product[i+1] += product[i] % 10;
+            product[i] /= 10;
+        }
+    }
+
+    if(*(product.end()- 1) == 0 ){
+        product.erase(product.end() - 1);
+        product.shrink_to_fit();
+    }
+
+    return product;
+}
+
+std::pair<BigInteger, BigInteger>& BigInteger::_helpDiv(BigInteger &lhs, const BigInteger &rhs)
+{
+    std::pair<BigInteger, BigInteger> quotientRemainderPair;
+    while(!lhs.isZero() && lhs > rhs) {
+        lhs-=rhs;
+        ++quotientRemainderPair.first;
+    }
+    quotientRemainderPair.second = lhs;
+    
+    return quotientRemainderPair;
 }
 
 std::vector<BigInteger::digit_t>& BigInteger::_helpAdd(const std::vector<digit_t> &lhs, const std::vector<digit_t> &rhs)
 {
     digit_t carry = 0;
     std::vector<digit_t> sum;
-    sum.reserve(lhs.size() > rhs.size() ? lhs.size() : rhs.size());
+    sum.resize(lhs.size() > rhs.size() ? lhs.size() : rhs.size());
     auto it_sum_digit = sum.begin();
     auto i = lhs.begin(), j = rhs.begin();
 
@@ -282,6 +303,7 @@ BigInteger& BigInteger::operator-=(const BigInteger& rhs)
     return *this;
 }
 
+
 BigInteger& BigInteger::operator*=(const BigInteger& rhs)
 {
     if((*this).isZero() || rhs.isZero() ) {
@@ -290,21 +312,36 @@ BigInteger& BigInteger::operator*=(const BigInteger& rhs)
         return *this;
     }
 
-    if((*this).sign == rhs.sign) { (*this).sign = sign_t::plus; }
-    else { (*this).sign = sign_t::minus; }
-/*
-    bool rhsMatters = false; 
-    if(rhs.value.size() > (*this).value.size()) { 
-        (*this).value.resize(rhs.value.size());
-        rhsMatters = true;
-    }
+    if(this->sign == rhs.sign) { this->sign = sign_t::plus; }
+    else { this->sign = sign_t::minus; }
 
-    if((*this).value.size() >= rhs.value.size()) { _helpMult((*this).value, rhs.value); }
-    else {
-        std::vector<BigInteger::digit_t> tmp = rhs.value;
-        _helpMult(tmp, (*this).value);
-        (*this).value = tmp;
-    }*/
+    this->value = _helpMult(this->value, rhs.value);
+
+    return *this;
+}
+
+BigInteger& BigInteger::operator/=(const BigInteger& rhs) 
+{
+    if(rhs.isZero()) {
+        throw Exceptions::DivisionByZero("division by zero");
+    }
+    BigInteger tmp = BigInteger(sign_t::plus, this->value);
+    this->value = _helpDiv(tmp, BigInteger(sign_t::plus, rhs.value)).first.value;
+
+    this->sign = (this->sign == rhs.sign) ? sign_t::plus : sign_t::minus;
+
+    return *this;
+}
+
+BigInteger& BigInteger::operator%=(const BigInteger& rhs) 
+{
+    if(rhs.isZero()) {
+        throw Exceptions::DivisionByZero("division by zero");
+    }
+    BigInteger tmp = BigInteger(sign_t::plus, this->value);
+    this->value = _helpDiv(tmp, BigInteger(sign_t::plus, rhs.value)).second.value;
+
+    return *this;
 }
 /*********NON-MEMBER*******/
 
@@ -351,7 +388,7 @@ BigInteger::digit_t BigInteger::digitAt(size_t pos)
     try {
         return this->value.at(this->value.size() - pos);
     } catch(std::out_of_range) {
-        throw Exceptions::NonexistantDigit("pos does indicate a digit that exists");
+        throw Exceptions::NonexistantDigit("pos does not indicate a digit that exists");
     }
 }
 
@@ -360,7 +397,7 @@ BigInteger::sign_t BigInteger::getSign()
     return this->sign;
 }
 
-size_t BigInteger::getLength()
+size_t BigInteger::getNumberOfDigits()
 {
     return this->value.size();
 }
